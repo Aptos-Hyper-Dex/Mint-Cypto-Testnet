@@ -1,5 +1,6 @@
 module MintToken::mint_test_coin {
     use std::signer;
+    use std::string;
     use aptos_framework::coin;
     use aptos_framework::aptos_account;
 
@@ -12,7 +13,7 @@ module MintToken::mint_test_coin {
     struct Coin has store, drop, key {}
 
     /// Initialize the coin with metadata and publishing account as admin.
-    public entry fun init_module(account: &signer) {
+    fun init_module(account: &signer) {
         // Ensure this is only called once by the module address
         let module_addr = @MintToken;
         let caller = signer::address_of(account);
@@ -20,8 +21,8 @@ module MintToken::mint_test_coin {
 
         let (burn_cap, freeze_cap, mint_cap) = coin::initialize<Coin>(
             account,
-            b"Mint Test Coin",
-            b"MINT",
+            string::utf8(b"Bitcoin Test Coin"),
+            string::utf8(b"BTC"),
             6,
             true
         );
@@ -38,24 +39,24 @@ module MintToken::mint_test_coin {
     }
 
     /// Mint to the caller's account after ensuring they are registered
-    public entry fun mint(account: &signer, amount: u64) {
+    public entry fun mint(account: &signer, amount: u64) acquires MintCapHolder {
         let caller_addr = signer::address_of(account);
         if (!coin::is_account_registered<Coin>(caller_addr)) {
             coin::register<Coin>(account);
-        }
+        };
         mint_to_internal(account, caller_addr, amount);
     }
 
     /// Mint to any recipient address (module address must sign)
-    public entry fun mint_to(account: &signer, recipient: address, amount: u64) {
+    public entry fun mint_to(account: &signer, recipient: address, amount: u64) acquires MintCapHolder {
         let module_addr = @MintToken;
         assert!(signer::address_of(account) == module_addr, 2);
         mint_to_internal(account, recipient, amount);
     }
 
-    fun mint_to_internal(account: &signer, recipient: address, amount: u64) {
-        let MintCapHolder { cap } = borrow_global<MintCapHolder>(@MintToken);
-        let coins = coin::mint<Coin>(amount, &cap);
+    fun mint_to_internal(_account: &signer, recipient: address, amount: u64) acquires MintCapHolder {
+        let holder = borrow_global<MintCapHolder>(@MintToken);
+        let coins = coin::mint<Coin>(amount, &holder.cap);
         aptos_account::deposit_coins<Coin>(recipient, coins);
     }
 }
