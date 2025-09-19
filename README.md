@@ -4,11 +4,11 @@ A Move package that defines a test coin with dynamic metadata management and min
 
 ## Features
 
-- ✅ **Dynamic Metadata Management**: Update coin name, symbol, decimals, and mintable status
-- ✅ **Minting Control**: Pause/resume minting functionality
-- ✅ **Flexible Minting**: Mint to self or any recipient address
-- ✅ **Admin Controls**: Module address controls all administrative functions
-- ✅ **Error Handling**: Comprehensive error codes for different scenarios
+- **Dynamic Metadata Management**: Update coin name, symbol, decimals, and mintable status
+- **Minting Control**: Pause/resume minting functionality
+- **Flexible Minting**: Mint to self or any recipient address
+- **Admin Controls**: Module address controls all administrative functions
+- **Error Handling**: Comprehensive error codes for different scenarios
 
 ## Prerequisites
 - Install Aptos CLI.
