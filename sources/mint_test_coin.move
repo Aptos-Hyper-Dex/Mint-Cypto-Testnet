@@ -21,8 +21,8 @@ module MintToken::mint_test_coin {
 
         let (burn_cap, freeze_cap, mint_cap) = coin::initialize<Coin>(
             account,
-            string::utf8(b"Bitcoin Test Coin"),
-            string::utf8(b"BTC"),
+            string::utf8(b"USDC Coin"),
+            string::utf8(b"USDC"),
             6,
             true
         );
