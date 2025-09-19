@@ -1,6 +1,7 @@
 [package]
 name = "MintTestCoin"
 version = "0.0.1"
+upgrade_policy = "compatible"
 
 [addresses]
 # Named address for your module publisher. Replace on publish, e.g. --named-addresses MintToken=0x<account>

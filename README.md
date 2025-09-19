@@ -1,6 +1,14 @@
 # MintTestCoin on Aptos Testnet
 
-A minimal Move package that defines a test coin and entry functions to mint.
+A Move package that defines a test coin with dynamic metadata management and minting capabilities.
+
+## Features
+
+- ✅ **Dynamic Metadata Management**: Update coin name, symbol, decimals, and mintable status
+- ✅ **Minting Control**: Pause/resume minting functionality
+- ✅ **Flexible Minting**: Mint to self or any recipient address
+- ✅ **Admin Controls**: Module address controls all administrative functions
+- ✅ **Error Handling**: Comprehensive error codes for different scenarios
 
 ## Prerequisites
 - Install Aptos CLI.
@@ -35,19 +43,58 @@ aptos move run --function-id "MintToken::mint_test_coin::init_module" \
   --profile mint_profile --assume-yes
 ```
 
-## Mint to self (caller)
+## Minting Functions
+
+### Mint to self (caller)
 ```bash
 aptos move run --function-id "MintToken::mint_test_coin::mint" \
   --args u64:1000000 \
   --profile mint_profile --assume-yes
 ```
-Here `6` decimals are used, so 1 token = 1_000_000 units.
+**Note**: Minting will fail if the contract is paused (see metadata management below).
 
-## Mint to another address (admin only)
+### Mint to another address (admin only)
 ```bash
 RECIPIENT=0x<hex>
 aptos move run --function-id "MintToken::mint_test_coin::mint_to" \
   --args address:$RECIPIENT u64:1000000 \
+  --profile mint_profile --assume-yes
+```
+**Note**: Only the module address can call this function.
+
+## Metadata Management
+
+The contract now supports dynamic metadata updates. Only the module address can modify metadata.
+
+### Update coin metadata
+```bash
+# Update name, symbol, decimals, and mintable status
+aptos move run --function-id "MintToken::mint_test_coin::update_metadata" \
+  --args string:"My Token" string:"MTK" u8:8 bool:true \
+  --profile mint_profile --assume-yes
+```
+
+### Pause/Resume minting
+```bash
+# Pause minting
+aptos move run --function-id "MintToken::mint_test_coin::set_mintable" \
+  --args bool:false \
+  --profile mint_profile --assume-yes
+
+# Resume minting
+aptos move run --function-id "MintToken::mint_test_coin::set_mintable" \
+  --args bool:true \
+  --profile mint_profile --assume-yes
+```
+
+### View current metadata
+```bash
+# Get current metadata (name, symbol, decimals, is_mintable)
+aptos move run --function-id "MintToken::mint_test_coin::get_metadata" \
+  --profile mint_profile --assume-yes
+
+# Check if minting is currently allowed
+aptos move run --function-id "MintToken::mint_test_coin::is_mintable" \
   --profile mint_profile --assume-yes
 ```
 
@@ -58,5 +105,13 @@ aptos account balance --account $OWNER --profile mint_profile | cat
 ```
 
 ## Notes
-- Module address `MintToken` controls `mint_to`. Anyone can call `mint` on their own after `init_module` is executed by the module address.
-- Decimals: 6. Symbol: MINT. Name: Mint Test Coin.
+- **Permissions**: Module address `MintToken` controls `mint_to` and all metadata management functions. Anyone can call `mint` on their own after `init_module` is executed by the module address.
+- **Dynamic Metadata**: The contract supports updating coin name, symbol, decimals, and mintable status after deployment.
+- **Minting Control**: Minting can be paused/resumed by the module address. All minting functions will fail when paused.
+- **Default Values**: Initial decimals: 6, Symbol: USDC, Name: USDC Coin, Mintable: true.
+- **Error Codes**: 
+  - `1`: Non-module address calling init_module
+  - `2`: Non-module address calling mint_to
+  - `3`: Non-module address calling update_metadata
+  - `4`: Non-module address calling set_mintable
+  - `5`: Attempting to mint when paused
